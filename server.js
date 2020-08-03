@@ -3,11 +3,14 @@ const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
 const formatMessage = require('./utils/messages');
+
+
 const {
   userJoin,
   getCurrentUser,
   userLeave,
-  getRoomUsers
+  getRoomUsers,
+  isHost,
 } = require('./utils/users');
 
 const app = express();
@@ -27,9 +30,18 @@ io.on('connection', socket => {
     socket.join(user.room);
 
     // Welcome current user
+    // only to the user who just joined
     socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!'));
 
+    // if (!isHost(user)) {
+
+    //   let startTime = 60
+    //   socket.emit('player-message', startTime);
+    // }
+
     // Broadcast when a user connects
+    // to everyone except the person who just joined
+    
     socket.broadcast
       .to(user.room)
       .emit(
@@ -38,11 +50,17 @@ io.on('connection', socket => {
       );
 
     // Send users and room info
+    //to everyone
     io.to(user.room).emit('roomUsers', {
       room: user.room,
       users: getRoomUsers(user.room)
     });
   });
+  socket.on("currentHostTime", time => {
+   
+    socket.broadcast
+    .emit("currentHostTime", time)
+  })
 
   // Listen for chatMessage
   socket.on('chatMessage', msg => {

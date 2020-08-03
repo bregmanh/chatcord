@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server",
-    "dev": "nodemon server"
+    "dev": "nodemon -L server"
   },
   "author": "Brad Traversy",
   "license": "MIT",

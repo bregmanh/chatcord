@@ -28,9 +28,22 @@ function getRoomUsers(room) {
   return users.filter(user => user.room === room);
 }
 
+function isHost(currentUser){
+  let index = users.findIndex(user => user.id === currentUser.id);
+  console.log("user index", index);
+  if(index === 0){
+    return true;
+  }else{
+    return false;
+  }
+}
+
+
 module.exports = {
   userJoin,
   getCurrentUser,
   userLeave,
-  getRoomUsers
+  getRoomUsers,
+  isHost,
+  
 };

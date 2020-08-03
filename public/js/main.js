@@ -3,15 +3,46 @@ const chatMessages = document.querySelector('.chat-messages');
 const roomName = document.getElementById('room-name');
 const userList = document.getElementById('users');
 
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+let player;
+let timeStart = 0;
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('player', {
+    width: 600,
+    height: 400,
+    videoId: 'Dm9Zf1WYQ_A',
+    playerVars: {
+      color: 'white',
+      //controls: 0
+      // playlist: 'YR5ApYxkU-U,Tj75Arhq5ho'
+    },
+    events: {
+      'onReady': onPlayerReady
+    }
+  });
+}
+
+function onPlayerReady(event) {
+  event.target.seekTo(timeStart);
+  event.target.playVideo();
+
+
 // Get username and room from URL
 const { username, room } = Qs.parse(location.search, {
   ignoreQueryPrefix: true
 });
 
+
 const socket = io();
 
 // Join chatroom
-socket.emit('joinRoom', { username, room });
+console.log("player current time", player)
+socket.emit('joinRoom', { username, room});
+
 
 // Get room and users
 socket.on('roomUsers', ({ room, users }) => {
@@ -23,9 +54,21 @@ socket.on('roomUsers', ({ room, users }) => {
 socket.on('message', message => {
   console.log(message);
   outputMessage(message);
+  console.log("player", player)
+  socket.emit("currentHostTime", {currentHostTime: player.getCurrentTime()})
+
 
   // Scroll down
   chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+
+socket.on('player-message', time => {
+  timeStart = time;
+  console.log("haiii ")
+});
+socket.on("currentHostTime", time=>{
+  event.target.seekTo(time.currentHostTime);
+  event.target.playVideo();
 });
 
 // Message submit
@@ -65,3 +108,6 @@ function outputUsers(users) {
     ${users.map(user => `<li>${user.username}</li>`).join('')}
   `;
 }
+}
+
+
